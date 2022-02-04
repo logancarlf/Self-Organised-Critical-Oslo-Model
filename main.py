@@ -53,7 +53,7 @@ class Model:
         self.__z[0] += 1
         self.__heights[0] += 1
 
-    def relax(self):
+    def relax(self, animate):
         relax_sites = [0]
         avalanche_size = 0
         while len(relax_sites) != 0:
@@ -77,12 +77,13 @@ class Model:
                     self.__z[i] -= 1
                     self.__z[i-1] += 1
                 self.__threshold[i] = random.randint(1, 2)
-                self.animate()
+                if animate == True:
+                    self.animate()
 
-    def simulate(self, N):
+    def simulate(self, N, animate=False):
         for i in range(N):
             self.drive()
-            self.relax()
+            self.relax(animate=animate)
             time.sleep(0.1)
 
     def animate(self):
@@ -93,7 +94,7 @@ class Model:
         plot.display()
 
 
-y = Model(10)
-y.simulate(100)
+Oslo = Model(16)
+Oslo.simulate(100, animate=True)
 
 
