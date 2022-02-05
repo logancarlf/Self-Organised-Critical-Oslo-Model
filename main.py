@@ -1,100 +1,40 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-import random
-import time
+from packages import *
+from classes import *
 
+Oslo = Model(4, 0.5)
+Oslo.simulate(10, animate=True, data_height_1=False)
 
-class Lattice:
+#%%
+# Task 2a
 
-    def __init__(self, L):
-        self.__L = L
-        self.__gridh = 3 * L
-        self.__grid = np.zeros([self.__gridh, L])
+n = 7
+L = np.logspace(2, n+1, base=2, num=n)
+N = [100, 200, 600, 2500, 7500, 20000, 70000]
+N = [70000, 70000, 70000, 70000, 70000, 70000, 70000]
+c = np.arange(1, n+1)
 
-    def add(self, i):
-        for j in range(self.__gridh):
-            if self.__grid[j][i-1] == 0:
-                self.__grid[j][i-1] = 1
-                break
+norm = mpl.colors.Normalize(vmin=c.min(), vmax=c.max())
+cmap = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.Blues)
+cmap.set_array([])
 
-    def remove(self, i):
-        for j in range(self.__gridh-1, 0, -1):
-            if self.__grid[j][i-1] == 1:
-                self.__grid[j][i-1] = 0
-                break
+for i in tqdm(range(n-1, -1, -1)):
+    Oslo = Model(int(L[i]), 0.5)
+    Oslo.simulate(N[i], data_height_1=True)
+    height_1 = Oslo.height_1()
+    plt.plot(np.arange(0, N[i], 1), height_1, c=cmap.to_rgba(i+1), label="L=%s" %(int(L[i])))
+    mean = np.mean(height_1[(len(height_1)-100):])
+    steady_pos= np.where(height_1 > mean)[0][0]
+    plt.vlines(steady_pos, 0, 500, linestyles='dashed', color=cmap.to_rgba(i+1))
 
-    def display(self):
-        plt.figure(figsize=(1, 3))
-        cmap = mpl.colors.ListedColormap(['white', 'black'])
-        bounds = [0, 0, 1, 1]
-        norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
-        plt.pcolormesh(self.__grid, edgecolors=None, linewidth=1, norm=norm,
-                       cmap=cmap)
-        plt.yticks(np.arange(0, self.__gridh, 1))
-        plt.xticks(np.arange(0, self.__L, 1))
-        plt.xlim(0, self.__L)
-        plt.ylim(0, 3*self.__L)
-        plt.grid()
-        plt.show()
+plt.title("Pile Height Against Time")
+plt.xlabel("Number of Iterations / $N$")
+plt.ylabel("Height of $i=1$")
+plt.legend()
+plt.grid()
+plt.savefig("Figures/Fig_Task2a.png", dpi=600)
+plt.show()
 
-
-class Model:
-
-    def __init__(self, L):
-        self.__L = L
-        self.__z = np.zeros(L)
-        self.__heights = np.zeros(L)
-        self.__threshold = list()
-        for i in range(L):
-            self.__threshold.append(random.randint(1, 2))
-
-    def drive(self):
-        self.__z[0] += 1
-        self.__heights[0] += 1
-
-    def relax(self, animate):
-        relax_sites = [0]
-        avalanche_size = 0
-        while len(relax_sites) != 0:
-            relax_sites = list()
-            for i in range(self.__L):
-                if self.__z[i] > self.__threshold[i]:
-                    relax_sites.append(i)
-            for i in relax_sites:
-                avalanche_size += 1
-                self.__heights[i] -= 1
-                if i != self.__L-1:
-                    self.__heights[i+1] += 1
-                if i == 0:
-                    self.__z[i] -= 2
-                    self.__z[i+1] += 1
-                elif i != 0 and i != self.__L-1:
-                    self.__z[i] -= 2
-                    self.__z[i-1] += 1
-                    self.__z[i+1] += 1
-                elif i == self.__L-1:
-                    self.__z[i] -= 1
-                    self.__z[i-1] += 1
-                self.__threshold[i] = random.randint(1, 2)
-                if animate == True:
-                    self.animate()
-
-    def simulate(self, N, animate=False):
-        for i in range(N):
-            self.drive()
-            self.relax(animate=animate)
-            time.sleep(0.1)
-
-    def animate(self):
-        plot = Lattice(self.__L)
-        for i in range(self.__L):
-            for j in range(int(self.__heights[i])):
-                plot.add(i+1)
-        plot.display()
-
-
-Oslo = Model(16)
-Oslo.simulate(100, animate=True)
+#%%
+# Task 2b
 
 
