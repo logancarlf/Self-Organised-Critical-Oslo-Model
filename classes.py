@@ -1,11 +1,12 @@
-from packages import *
+import packages as pk
+
 
 class Lattice:
 
     def __init__(self, L):
         self.__L = L
         self.__gridh = 3 * L
-        self.__grid = np.zeros([self.__gridh, L])
+        self.__grid = pk.np.zeros([self.__gridh, L])
 
     def add(self, i):
         for j in range(self.__gridh):
@@ -20,18 +21,18 @@ class Lattice:
                 break
 
     def display(self):
-        plt.figure(figsize=(1, 3))
-        cmap = mpl.colors.ListedColormap(['white', 'black'])
+        pk.plt.figure(figsize=(1, 3))
+        cmap = pk.mpl.colors.ListedColormap(['white', 'black'])
         bounds = [0, 0, 1, 1]
-        norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
-        plt.pcolormesh(self.__grid, edgecolors=None, linewidth=1, norm=norm,
-                       cmap=cmap)
-        plt.yticks(np.arange(0, self.__gridh, 1))
-        plt.xticks(np.arange(0, self.__L, 1))
-        plt.xlim(0, self.__L)
-        plt.ylim(0, 3*self.__L)
-        plt.grid()
-        plt.show()
+        norm = pk.mpl.colors.BoundaryNorm(bounds, cmap.N)
+        pk.plt.pcolormesh(self.__grid, edgecolors=None, linewidth=1, norm=norm,
+                          cmap=cmap)
+        pk.plt.yticks(pk.np.arange(0, self.__gridh, 1))
+        pk.plt.xticks(pk.np.arange(0, self.__L, 1))
+        pk.plt.xlim(0, self.__L)
+        pk.plt.ylim(0, 3*self.__L)
+        pk.plt.grid()
+        pk.plt.show()
 
 
 class Model:
@@ -39,8 +40,8 @@ class Model:
     def __init__(self, L, p):
         self.__L = L
         self.__p = p
-        self.__z = np.zeros(L)
-        self.__heights = np.zeros(L)
+        self.__z = pk.np.zeros(L)
+        self.__heights = pk.np.zeros(L)
         self.__stop = False
         self.__threshold = list()
         for i in range(L):
@@ -74,24 +75,24 @@ class Model:
                 elif i == self.__L-1:
                     self.__z[i] -= 1
                     self.__z[i-1] += 1
-                    if grain_leave_stop == True:
+                    if grain_leave_stop is True:
                         self.__stop = True
                 self.__threshold[i] = probz(self.__p)
-            if animate == True:
+            if animate is True:
                 self.animate()
 
-    def simulate(self, N, animate=False, data_height_1=False, grain_leave_stop=False):
-        for i in tqdm(range(N)):
+    def simulate(self, N, animate=False, data_height_1=False,
+                 grain_leave_stop=False):
+        for i in range(N):
             self.drive()
-            self.relax(animate=animate)
-            if animate == True:
-                time.sleep(0)
-            if data_height_1 == True:
+            self.relax(animate=animate, grain_leave_stop=grain_leave_stop)
+            if animate is True:
+                pk.time.sleep(0)
+            if data_height_1 is True:
                 self.__data_height_1.append(self.__heights[0])
-            if grain_leave_stop == True:
-                if self.__stop == True:
+            if grain_leave_stop is True:
+                if self.__stop is True:
                     break
-
 
     def animate(self):
         plot = Lattice(self.__L)
@@ -107,13 +108,12 @@ class Model:
         return self.__data_height_1
 
     def grains(self):
-        return np.sum(self.__heights)
+        return pk.np.sum(self.__heights)
 
 
 def probz(p):
-    x = np.random.uniform(0, 1)
+    x = pk.np.random.uniform(0, 1)
     if x < p:
         return 1
     else:
         return 2
-
