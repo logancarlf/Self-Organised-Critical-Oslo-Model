@@ -107,6 +107,18 @@ class Model:
     def height_1(self):
         return self.__data_height_1
 
+    def solid_state(self):
+        array_size = len(self.height_1())
+        minr = pk.np.max(self.__data_height_1[array_size-100:])
+        for i in range(len(self.__data_height_1)):
+            if self.__data_height_1[i] > minr:
+                return i + 100
+
+    def ave_height_1(self):
+        ss_time = self.solid_state()
+        av = pk.np.mean(self.__data_height_1[ss_time:])
+        return av
+
     def grains(self):
         return pk.np.sum(self.__heights)
 
