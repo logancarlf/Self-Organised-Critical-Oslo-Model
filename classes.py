@@ -42,8 +42,9 @@ class Model:
         self.__p = p
         self.__z = pk.np.zeros(L)
         self.__heights = pk.np.zeros(L)
-        self.__stop = False
+        self.__steady = False
         self.__threshold = list()
+        self.__avalanche_size = list()
         for i in range(L):
             self.__threshold.append(probz(p))
         self.__data_height_1 = list()
@@ -53,6 +54,7 @@ class Model:
         self.__heights[0] += 1
 
     def relax(self, animate, grain_leave_stop):
+        self.__s = 0
         relax_sites = [0]
         avalanche_size = 0
         while len(relax_sites) != 0:
@@ -61,7 +63,7 @@ class Model:
                 if self.__z[i] > self.__threshold[i]:
                     relax_sites.append(i)
             for i in relax_sites:
-                avalanche_size += 1
+                self.__s += 1
                 self.__heights[i] -= 1
                 if i != self.__L-1:
                     self.__heights[i+1] += 1
@@ -75,14 +77,14 @@ class Model:
                 elif i == self.__L-1:
                     self.__z[i] -= 1
                     self.__z[i-1] += 1
-                    if grain_leave_stop is True:
-                        self.__stop = True
+                    self.__steady = True
                 self.__threshold[i] = probz(self.__p)
+
             if animate is True:
                 self.animate()
 
     def simulate(self, N, animate=False, data_height_1=False,
-                 grain_leave_stop=False):
+                 grain_leave_stop=False, avalanche_data=False):
         for i in range(N):
             self.drive()
             self.relax(animate=animate, grain_leave_stop=grain_leave_stop)
@@ -91,8 +93,15 @@ class Model:
             if data_height_1 is True:
                 self.__data_height_1.append(self.__heights[0])
             if grain_leave_stop is True:
-                if self.__stop is True:
+                if self.__steady is True:
                     break
+            if avalanche_data is True:
+                if self.__steady is True:
+                    self.__avalanche_size.append(self.__s)
+
+    def avalanche_size(self):
+        return self.__avalanche_size
+
 
     def animate(self):
         plot = Lattice(self.__L)
