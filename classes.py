@@ -33,7 +33,9 @@ class Lattice:
         pk.plt.ylim(0, 3*self.__L)
         pk.plt.grid()
         pk.plt.show()
-
+        
+    def grid(self):
+        return self.__grid
 
 class Model:
 
@@ -48,6 +50,7 @@ class Model:
         for i in range(L):
             self.__threshold.append(probz(p))
         self.__data_height_1 = list()
+        self.__data_heights = list()
 
     def drive(self):
         self.__z[0] += 1
@@ -84,7 +87,8 @@ class Model:
                 self.animate()
 
     def simulate(self, N, animate=False, data_height_1=False,
-                 grain_leave_stop=False, avalanche_data=False):
+                 grain_leave_stop=False, avalanche_data=False,
+                 height_data_store=False):
         for i in range(N):
             self.drive()
             self.relax(animate=animate, grain_leave_stop=grain_leave_stop)
@@ -98,10 +102,11 @@ class Model:
             if avalanche_data is True:
                 if self.__steady is True:
                     self.__avalanche_size.append(self.__s)
+            if height_data_store is True:
+                self.__data_heights.append(list(self.__heights))
 
     def avalanche_size(self):
         return self.__avalanche_size
-
 
     def animate(self):
         plot = Lattice(self.__L)
@@ -115,6 +120,9 @@ class Model:
 
     def height_1(self):
         return self.__data_height_1
+    
+    def data_heights(self):
+        return self.__data_heights
 
     def solid_state(self):
         array_size = len(self.height_1())
